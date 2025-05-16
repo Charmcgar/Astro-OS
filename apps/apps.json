@@ -3,7 +3,6 @@
   { "name": "Calculator",     "url": "apps/calculator.html",    "icon": "icons/calc-icon.png",  "pinned": false },
   { "name": "Clock",          "url": "apps/clock.html",         "icon": "icons/clock-icon.png", "pinned": true },
 
-  // New apps ↓
   {
     "name": "Notes",
     "url":  "apps/notes.html",
