@@ -1,0 +1,5 @@
+[
+  { "name": "Text Editor", "url": "apps/text-editor.html", "icon": "icons/text-icon.png" },
+  { "name": "Calculator",  "url": "apps/calculator.html",   "icon": "icons/calc-icon.png" },
+  { "name": "Clock",       "url": "apps/clock.html",        "icon": "icons/clock-icon.png" }
+]
