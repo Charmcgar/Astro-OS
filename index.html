@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web OS</title>
   <style>
-    /* (Keep all previous styles here, same as before) */
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -15,7 +13,135 @@
       user-select: none;
       overflow: hidden;
     }
-    /* ... rest of styles unchanged ... */
+
+    #desktop {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Windows-style taskbar */
+    #taskbar {
+      background: #222;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.5);
+      z-index: 10000;
+    }
+
+    /* Pinned icons on left */
+    #pinned-apps {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pinned-app {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .pinned-app img {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Open apps center */
+    #open-apps {
+      display: flex;
+      gap: 4px;
+      flex-grow: 1;
+      justify-content: center;
+    }
+
+    .taskbar-app {
+      background: #333;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      border-radius: 2px;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .taskbar-app.active {
+      background: #0078d7;
+      font-weight: bold;
+    }
+
+    /* System tray on right */
+    #system-tray {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #tray-clock {
+      font-size: 13px;
+      cursor: default;
+    }
+
+    /* Desktop icons and windows as before */
+    #icon-container {
+      padding: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .icon {
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .icon img {
+      width: 50px;
+      height: 50px;
+    }
+
+    #windows {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 40px;
+      pointer-events: none;
+    }
+
+    .app-window {
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      width: 400px;
+      height: 300px;
+      background: white;
+      color: black;
+      border: 1px solid #ccc;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      pointer-events: all;
+      user-select: text;
+    }
+
+    .window-header {
+      background: #333;
+      color: white;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      cursor: grab;
+      user-select: none;
+    }
 
     .app-window iframe {
       border: none;
@@ -28,147 +154,152 @@
 <body>
   <div id="desktop">
     <div id="taskbar">
-      <button id="start-menu">Start</button>
+      <div id="pinned-apps"></div>
       <div id="open-apps"></div>
-    </div>
-    <div id="start-dropdown">
-      <button onclick="openApp('Text Editor', 'apps/text-editor.html')">Text Editor</button>
-      <!-- Add more start menu apps here -->
-    </div>
-    <div id="icon-container">
-      <div class="icon" onclick="openApp('Text Editor', 'apps/text-editor.html')">
-        <img src="text-icon.png" alt="Text Editor" />
-        <span>Text Editor</span>
+      <div id="system-tray">
+        <div id="tray-clock"></div>
       </div>
     </div>
+
+    <div id="start-dropdown"></div>
+    <div id="icon-container"></div>
     <div id="windows"></div>
   </div>
 
   <script>
     const openAppsContainer = document.getElementById('open-apps');
+    const pinnedContainer = document.getElementById('pinned-apps');
+    const trayClock = document.getElementById('tray-clock');
     const windowsContainer = document.getElementById('windows');
-    const startMenuBtn = document.getElementById('start-menu');
+    const iconContainer = document.getElementById('icon-container');
     const startDropdown = document.getElementById('start-dropdown');
 
     let openApps = [];
+    let appList = [];
 
-    startMenuBtn.addEventListener('click', () => {
-      startDropdown.style.display =
-        startDropdown.style.display === 'flex' ? 'none' : 'flex';
-    });
+    // Clock update
+    function updateClock() {
+      const now = new Date();
+      trayClock.textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    document.addEventListener('click', (e) => {
-      if (!startMenuBtn.contains(e.target) && !startDropdown.contains(e.target)) {
-        startDropdown.style.display = 'none';
-      }
-    });
+    // Load apps metadata
+    fetch('apps/apps.json')
+      .then(res => res.json())
+      .then(data => {
+        appList = data;
+        renderPinned();
+        renderStartMenu();
+        renderDesktopIcons();
+      })
+      .catch(err => console.error(err));
 
-    function openApp(appName, appUrl) {
-      // If app already open, bring to front and activate on taskbar
-      let existing = openApps.find(app => app.name === appName);
+    function renderPinned() {
+      pinnedContainer.innerHTML = '';
+      appList.filter(a => a.pinned).forEach(app => {
+        const btn = document.createElement('button');
+        btn.className = 'pinned-app';
+        btn.innerHTML = `<img src="${app.icon}" alt="${app.name}" />`;
+        btn.onclick = () => openApp(app.name, app.url);
+        pinnedContainer.appendChild(btn);
+      });
+    }
+
+    function renderStartMenu() {
+      startDropdown.innerHTML = '';
+      appList.forEach(app => {
+        const btn = document.createElement('button');
+        btn.textContent = app.name;
+        btn.onclick = () => openApp(app.name, app.url);
+        startDropdown.appendChild(btn);
+      });
+    }
+
+    function renderDesktopIcons() {
+      iconContainer.innerHTML = '';
+      appList.forEach(app => {
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+        icon.onclick = () => openApp(app.name, app.url);
+        icon.innerHTML = `
+          <img src="${app.icon}" alt="${app.name}" />
+          <span>${app.name}</span>
+        `;
+        iconContainer.appendChild(icon);
+      });
+    }
+
+    function openApp(name, url) {
+      let existing = openApps.find(a => a.name === name);
       if (existing) {
-        bringToFront(existing.window);
-        setActiveTaskbar(appName);
+        bringToFront(existing.win);
+        setActive(name);
         return;
       }
-
-      const appWindow = document.createElement('div');
-      appWindow.className = 'app-window';
-      appWindow.style.zIndex = openApps.length + 1;
-      appWindow.innerHTML = `
+      const win = document.createElement('div');
+      win.className = 'app-window';
+      win.style.zIndex = openApps.length + 1;
+      win.innerHTML = `
         <div class="window-header">
-          <span>${appName}</span>
-          <button onclick="closeApp(this)">X</button>
+          <span>${name}</span><button onclick="closeApp(this)">X</button>
         </div>
-        <iframe src="${appUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+        <iframe src="${url}" sandbox="allow-scripts allow-same-origin"></iframe>
       `;
-      windowsContainer.appendChild(appWindow);
+      windowsContainer.appendChild(win);
 
-      // Dragging logic
-      const header = appWindow.querySelector('.window-header');
-      let isDragging = false;
-      let offsetX = 0, offsetY = 0;
+      // Drag
+      const hdr = win.querySelector('.window-header');
+      let dr=false,x=0,y=0;
+      hdr.onmousedown = e=>{dr=true;x=e.clientX-win.offsetLeft;y=e.clientY-win.offsetTop;bringToFront(win)};
+      document.onmousemove = e=>dr&&(win.style.left=`${e.clientX-x}px`,win.style.top=`${e.clientY-y}px`);
+      document.onmouseup = ()=>dr=false;
 
-      header.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - appWindow.offsetLeft;
-        offsetY = e.clientY - appWindow.offsetTop;
-        bringToFront(appWindow);
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-          appWindow.style.left = `${e.clientX - offsetX}px`;
-          appWindow.style.top = `${e.clientY - offsetY}px`;
-        }
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-      });
-
-      // Add to open apps
-      openApps.push({ name: appName, window: appWindow, minimized: false });
-      addTaskbarButton(appName);
-
-      bringToFront(appWindow);
-      setActiveTaskbar(appName);
-      startDropdown.style.display = 'none';
+      openApps.push({ name, win });
+      addTaskbar(name);
+      bringToFront(win);
+      setActive(name);
     }
 
-    function closeApp(button) {
-      const appWindow = button.closest('.app-window');
-      const appName = appWindow.querySelector('.window-header span').textContent;
-
-      appWindow.remove();
-
-      openApps = openApps.filter(app => app.window !== appWindow);
-      removeTaskbarButton(appName);
+    function closeApp(btn) {
+      const win = btn.closest('.app-window');
+      const name = win.querySelector('.window-header span').textContent;
+      win.remove();
+      openApps = openApps.filter(a => a.win !== win);
+      removeTaskbar(name);
     }
 
-    function addTaskbarButton(appName) {
+    function addTaskbar(name) {
       const btn = document.createElement('button');
       btn.className = 'taskbar-app';
-      btn.textContent = appName;
-      btn.dataset.appName = appName;
-      btn.onclick = () => toggleMinimize(appName);
+      btn.textContent = name;
+      btn.dataset.name = name;
+      btn.onclick = ()=>toggle(name);
       openAppsContainer.appendChild(btn);
     }
 
-    function removeTaskbarButton(appName) {
-      const btn = openAppsContainer.querySelector(`[data-app-name="${appName}"]`);
-      if (btn) btn.remove();
+    function removeTaskbar(name) {
+      const btn=document.querySelector(`.taskbar-app[data-name="${name}"]`);
+      btn&&btn.remove();
     }
 
-    function toggleMinimize(appName) {
-      const app = openApps.find(a => a.name === appName);
+    function toggle(name) {
+      const app = openApps.find(a=>a.name===name);
       if (!app) return;
-      if (app.minimized) {
-        app.window.style.display = 'flex';
-        app.minimized = false;
-        setActiveTaskbar(appName);
-        bringToFront(app.window);
-      } else {
-        app.window.style.display = 'none';
-        app.minimized = true;
-        setActiveTaskbar(null);
-      }
+      const visible = app.win.style.display!=='none';
+      app.win.style.display = visible?'none':'flex';
+      setActive(visible?null:name);
+      !visible&&bringToFront(app.win);
     }
 
-    function bringToFront(appWindow) {
-      // Set highest z-index for this window
-      let maxZ = 0;
-      openApps.forEach(a => {
-        const z = parseInt(a.window.style.zIndex) || 0;
-        if (z > maxZ) maxZ = z;
-      });
-      appWindow.style.zIndex = maxZ + 1;
+    function bringToFront(win) {
+      const maxZ = Math.max(0,...openApps.map(a=>parseInt(a.win.style.zIndex)||0));
+      win.style.zIndex = maxZ+1;
     }
 
-    function setActiveTaskbar(activeName) {
-      openAppsContainer.querySelectorAll('.taskbar-app').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.appName === activeName);
-      });
+    function setActive(name) {
+      document.querySelectorAll('.taskbar-app').forEach(btn=>btn.classList.toggle('active',btn.dataset.name===name));
     }
   </script>
 </body>
