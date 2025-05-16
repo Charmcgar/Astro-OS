@@ -1,5 +1,25 @@
 [
-  { "name": "Text Editor", "url": "apps/text-editor.html", "icon": "icons/text-icon.png", "pinned": true },
-  { "name": "Calculator",  "url": "apps/calculator.html",   "icon": "icons/calc-icon.png",    "pinned": false },
-  { "name": "Clock",       "url": "apps/clock.html",        "icon": "icons/clock-icon.png",   "pinned": true }
+  { "name": "Text Editor",   "url": "apps/text-editor.html",   "icon": "icons/text-icon.png",  "pinned": true },
+  { "name": "Calculator",     "url": "apps/calculator.html",    "icon": "icons/calc-icon.png",  "pinned": false },
+  { "name": "Clock",          "url": "apps/clock.html",         "icon": "icons/clock-icon.png", "pinned": true },
+
+  // New apps ↓
+  {
+    "name": "Notes",
+    "url":  "apps/notes.html",
+    "icon": "icons/notes-icon.png",
+    "pinned": false
+  },
+  {
+    "name": "File Explorer",
+    "url":  "apps/explorer.html",
+    "icon": "icons/folder-icon.png",
+    "pinned": false
+  },
+  {
+    "name": "Weather",
+    "url":  "apps/weather.html",
+    "icon": "icons/weather-icon.png",
+    "pinned": false
+  }
 ]
