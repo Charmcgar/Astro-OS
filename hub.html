@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Company Hub" />
+  <title>Company Hub</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; 
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      height: 100vh;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+    #app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* Sidebar */
+    #sidebar {
+      background: #0a84ff;
+      color: white;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      user-select: none;
+    }
+    #sidebar button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 24px;
+      margin: 20px 0;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sidebar button:hover,
+    #sidebar button.active {
+      background: rgba(255 255 255 / 0.3);
+    }
+    #sidebar button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255 255 255 / 0.5);
+    }
+
+    /* Main content */
+    #content {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    h1 {
+      margin-top: 0;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      margin-bottom: 10px;
+    }
+    .btn {
+      background: #0a84ff;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+    .btn:hover {
+      background: #0066ff;
+    }
+    .btn:active {
+      background: #004db3;
+    }
+
+    /* Responsive */
+    @media (max-width: 450px) {
+      #sidebar {
+        width: 60px;
+        padding-top: 15px;
+      }
+      #sidebar button {
+        margin: 15px 0;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        border-radius: 8px;
+      }
+      #content {
+        padding: 15px;
+      }
+      .card {
+        padding: 15px;
+      }
+      .btn {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar" role="navigation" aria-label="Main menu">
+      <button id="nav-home" aria-label="Home" class="active" title="Home">🏠</button>
+      <button id="nav-news" aria-label="News" title="News">📰</button>
+      <button id="nav-status" aria-label="Status" title="Status">📊</button>
+      <button id="nav-contact" aria-label="Contact" title="Contact">📞</button>
+      <button id="nav-about" aria-label="About" title="About">ℹ️</button>
+    </nav>
+    <main id="content" role="main" tabindex="-1">
+      <h1>Welcome to Company Hub</h1>
+      <div class="card">
+        <p>Use the menu on the left to navigate.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const content = document.getElementById("content");
+    const navButtons = document.querySelectorAll("#sidebar button");
+
+    function clearActive() {
+      navButtons.forEach(btn => btn.classList.remove("active"));
+    }
+
+    function renderHome() {
+      content.innerHTML = `
+        <h1>Welcome to Company Hub</h1>
+        <div class="card">
+          <p>Stay connected and up to date with all your company needs.</p>
+          <button class="btn" id="motd-btn">Show Message of the Day</button>
+        </div>
+      `;
+
+      document.getElementById("motd-btn").addEventListener("click", () => {
+        alert("📝 Message of the Day:\n\"Don't ship features — ship value.\"");
+      });
+    }
+
+    function renderNews() {
+      content.innerHTML = `
+        <h1>Company News</h1>
+        <div class="card">
+          <ul>
+            <li>🔔 AI Division expanded</li>
+            <li>🏆 Internal Hackathon June 15</li>
+            <li>☕ Office coffee upgraded</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function renderStatus() {
+      content.innerHTML = `
+        <h1>System Status</h1>
+        <div class="card">
+          <ul>
+            <li>🖥️ Web Server: <strong>Online ✅</strong></li>
+            <li>💾 Database: <strong>Online ✅</strong></li>
+            <li>🤖 AI Core: <strong>Online ✅</strong></li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function renderContact() {
+      content.innerHTML = `
+        <h1>Contact Support</h1>
+        <div class="card">
+          <p>Email: <a href="mailto:support@company.com">support@company.com</a></p>
+          <p>Phone: <a href="tel:1800482669">1-800-HUB-NOW</a></p>
+          <p>Address: 123 Main St, New York, NY</p>
+        </div>
+      `;
+    }
+
+    function renderAbout() {
+      content.innerHTML = `
+        <h1>About Us</h1>
+        <div class="card">
+          <p>We are an AI-driven company building the future.</p>
+          <p><strong>Founded:</strong> 2023</p>
+          <p><strong>Headquarters:</strong> New York, NY</p>
+          <p><strong>Motto:</strong> "Code. Think. Evolve."</p>
+        </div>
+      `;
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        clearActive();
+        btn.classList.add("active");
+
+        switch (btn.id) {
+          case "nav-home":
+            renderHome();
+            break;
+          case "nav-news":
+            renderNews();
+            break;
+          case "nav-status":
+            renderStatus();
+            break;
+          case "nav-contact":
+            renderContact();
+            break;
+          case "nav-about":
+            renderAbout();
+            break;
+        }
+        // Focus main content for accessibility
+        content.focus();
+      });
+    });
+
+    // Load home by default
+    renderHome();
+  </script>
+</body>
+</html>
